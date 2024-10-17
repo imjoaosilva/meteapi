@@ -8,6 +8,9 @@ pub enum Error {
 
     #[error("Wrong credentials")]
     WrongCredentials(),
+
+    #[error("Token creation error")]
+    TokenCreation(),
 }
 
 impl IntoResponse for Error {
@@ -26,6 +29,14 @@ impl IntoResponse for Error {
 
                 http::Response::builder()
                     .status(401)
+                    .body(Body::from(error))
+                    .unwrap()
+            }
+            Error::TokenCreation() => {
+                let error = r#"{ "status": 500, "message": "Token Creation Error" }"#;
+
+                http::Response::builder()
+                    .status(500)
                     .body(Body::from(error))
                     .unwrap()
             }

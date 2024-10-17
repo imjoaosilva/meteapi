@@ -1,4 +1,12 @@
-use super::{auth_model::{self, LoginResponse}, client_context::ClientContext, error::Error, user};
+use crate::{http::v1::models::jwt::Claims, KEYS};
+use jsonwebtoken::{encode, Header};
+
+use super::{
+    auth_model::{self, LoginResponse},
+    client_context::ClientContext,
+    error::Error,
+    user,
+};
 use axum::{body::Body, extract::rejection::JsonRejection, http, Extension, Json};
 
 pub async fn login(
@@ -13,10 +21,19 @@ pub async fn login(
     match user::get_user_by_username(client.db.clone(), &payload.username).await {
         Ok(Some(user)) => {
             if user.password == payload.password {
+                let claims = Claims {
+                    sub: user.id.to_string(),
+                    username: user.username,
+                    exp: 10000000000,
+                };
+
+                let token = encode(&Header::default(), &claims, &KEYS.encoding)
+                    .map_err(|_| Error::TokenCreation())?;
+
                 let json = serde_json::to_string(&LoginResponse {
                     status: 200,
                     message: "Login successful".to_string(),
-                    token: "tester".to_string(),
+                    token,
                 })
                 .unwrap();
                 let response = http::Response::builder()
@@ -29,11 +46,7 @@ pub async fn login(
                 Err(Error::WrongCredentials())
             }
         }
-        Ok(None) => {
-            Err(Error::WrongCredentials())
-        }
-        Err(_) => {
-            Err(Error::MissingCredentials())
-        }
+        Ok(None) => Err(Error::WrongCredentials()),
+        Err(_) => Err(Error::MissingCredentials()),
     }
 }

@@ -7,6 +7,7 @@ pub mod controllers;
 pub mod models;
 pub mod routers;
 pub mod repositories;
+pub mod middlewares;
 
 pub async fn serve(context: ClientContext, port: String) -> anyhow::Result<()> {
     let app = api_router().layer(Extension(context));
