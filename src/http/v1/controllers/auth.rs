@@ -23,7 +23,7 @@ pub async fn login(
             if user.password == payload.password {
                 let claims = Claims {
                     sub: user.id.to_string(),
-                    username: user.username,
+                    username: user.username.clone(),
                     exp: 10000000000,
                 };
 
@@ -34,6 +34,7 @@ pub async fn login(
                     status: 200,
                     message: "Login successful".to_string(),
                     token,
+                    username: user.username,
                 })
                 .unwrap();
                 let response = http::Response::builder()

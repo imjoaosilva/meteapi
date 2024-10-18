@@ -10,5 +10,11 @@ pub struct Login {
 pub struct LoginResponse {
     pub status: i32,
     pub message: String,
-    pub token: String
+    pub token: String,
+    pub username: String
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Me {
+    pub username: String
 }

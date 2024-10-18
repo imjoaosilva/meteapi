@@ -25,7 +25,7 @@ impl IntoResponse for Error {
                     .unwrap()
             }
             Error::WrongCredentials() => {
-                let error = r#"{ "status": 401, "message": "Wrong Credentials" }"#;
+                let error = r#"{ "status": 401, "message": "Credenciais Erradas!" }"#;
 
                 http::Response::builder()
                     .status(401)

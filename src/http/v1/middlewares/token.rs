@@ -9,7 +9,7 @@ use jsonwebtoken::{decode, Validation};
 use crate::KEYS;
 
 pub async fn token_middleware(
-    req: Request,
+    mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
     let auth_header = req
@@ -20,7 +20,7 @@ pub async fn token_middleware(
     if let Some(auth_header) = auth_header {
         let token = extract_token(auth_header).ok_or(StatusCode::UNAUTHORIZED)?;
         
-        decode::<Claims>(
+        let claim_data = decode::<Claims>(
             &token,
             &KEYS.decoding,
             &Validation::default(),
@@ -30,13 +30,13 @@ pub async fn token_middleware(
             StatusCode::UNAUTHORIZED
         })?;
 
+        req.extensions_mut().insert(claim_data.claims);
     } else {
         return Err(StatusCode::UNAUTHORIZED);
     };
 
     Ok(next.run(req).await)
 }
-
 
 fn extract_token(auth_header: &str) -> Option<&str> {
     let parts: Vec<&str> = auth_header.split_whitespace().collect();
