@@ -16,6 +16,8 @@ async fn main() -> Result<(), anyhow::Error> {
         .await
         .context("Failed to connect to MySQL")?;
 
+    println!("✨ Connected to MySQL");
+
     MIGRATOR
         .run(&pool)
         .await
